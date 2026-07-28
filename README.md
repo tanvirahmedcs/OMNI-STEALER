@@ -347,12 +347,3 @@ Users must obtain explicit written permission before testing any system they do 
 ```
 
 ---
-
-**Changes made:**
-
-1. **Repo URL** → `https://github.com/tanvirahmedcs/OMNI-STEALER.git`
-2. **Builder filename** → All references changed from `omni_stealer_v4.py` to `omni_stealer_builder.py`
-3. **Project structure** → Simplified to match your actual repo layout (just the builder, requirements, and README)
-4. **Clone command** → Uses your repo URL
-5. **All command examples** → Use `omni_stealer_builder.py` consistently
-6. **Configuration reference** → Updated to reference the correct filename
