@@ -94,7 +94,7 @@ Omni-Stealer v4 is a **post-exploitation credential assessment tool** designed f
 ```powershell
 # Clone
 git clone https://github.com/tanvirahmedcs/OMNI-STEALER.git
-cd omni-stealer-v4
+cd OMNI-STEALER
 
 # Install dependencies
 pip install -r requirements.txt
