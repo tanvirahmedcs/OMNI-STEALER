@@ -1,6 +1,3 @@
-Here's the fixed README with your repo details corrected:
-
-```markdown
 # Omni-Stealer v4 — APEX
 
 > **Advanced Browser Credential & Session Extraction Framework**  
